@@ -1,65 +1,95 @@
-import logo from './logo.svg';
 import './App.css';
-import React from 'react';
-
-class Login extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      token: "",
-    };
-
-    this.handleChange = this.handleChange.bind(this);
-    this.get = this.get.bind(this);
-  }
-
-  // componentDidMount() {
-
-  // }
-
-  handleChange(changeObject) {
-    this.setState(changeObject)
-  }
-
-  get(e) {
-    fetch("http://localhost:8080/login", {"method": "GET"})
-    .then(response => {
-      this.setState({redirectURL: response["url"]})
-    })
-    .catch(err => {
-      console.log(err)
-    })
-  }
-
-  render() {
-    return (
-      <button className="btn btn-primary" type="button" onClick={(e) => this.get({id: e.target.value})}>
-        Login
-      </button>
-    )
-  }
-}
+import { React, useState } from 'react';
+import { Routes, Route, NavLink as Link, useLocation } from "react-router-dom"
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <Login></Login>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <nav>
+        <ul>
+          <li>
+            <Link to="/" activeclassname="active" end>Home</Link>
+          </li>
+          <li>
+            <Link to="about" activeclassname="active">About</Link>
+          </li>
+          <li>
+            <Link to="login" activeclassname="active">Login</Link>
+          </li>
+        </ul>
+      </nav>
+      <div className="main">
+        {/* Define all the routes */}
+        <Routes>
+          <Route path="/" element={<Home />}></Route>
+          <Route path="about" element={<About />}></Route>
+          <Route path="login" element={<Login/>}></Route>
+          <Route path="welcome" element={<Welcome/>}></Route>
+          <Route path="*" element={<NotFound />}></Route>
+        </Routes>
+      </div>
     </div>
-  );
+  )
+}
+
+export const Home = () => {
+  return <div>You are in Home page</div>
+}
+export const About = () => {
+  return <div>This is the page where you put details about yourself</div>
+}
+
+export const Welcome = () => {
+  const search = useLocation().search;
+  const searchParams = new URLSearchParams(search);
+  const url = "http://localhost:8080/welcome" + "?" + searchParams.toString();
+
+  const [name, setName] = useState("");
+
+  const get = (url) => {
+    fetch(url, { "method": "GET", "redirect": "follow" })
+    .then(response => response.json())
+    .then(response => {
+      setName(response["name"]);
+    })
+    .catch((err) => {
+      console.log("error getting welcome page: " + err);
+    })
+  };
+
+  get(url);
+
+  return <div>Welcome to Power Attack Publishing, {name}!</div>
+}
+
+export const NotFound = () => {
+  return <div>This is a 404 page</div>
+}
+export const Login = () => {
+  const url = "http://localhost:8080/login"
+
+  const get = (url) => {
+    fetch(url, {"method": "GET", "redirect": "follow"})
+    .then(response => {
+      if (response.redirected) {
+        window.location.href = response.url;
+      }
+    })
+    .catch(err => {
+      console.log(err)
+    });
+  };
+  
+  return (
+    <button
+      className="btn btn-primary"
+      type="button"
+      onClick={(_) => { get(url); }
+      }
+    >
+      Login
+    </button>
+  )
 }
 
 export default App;
