@@ -1,6 +1,7 @@
 body {
   margin: 0 auto;
   max-width: 900px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif
 }
 nav ul {
   display: flex;
@@ -12,14 +13,23 @@ nav ul {
 
 nav a {
   text-decoration: none;
+  color: black;
   display: inline-block;
   padding: 1rem;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-weight: 500;
+  min-width: 100px;
 }
 .main {
   padding: 1rem;
 }
 
-/* ... */
 nav a.active {
-  background-color: #eee;
+  background-color: #8c110b;
+  font-weight: 500;
+  color: white;
+}
+
+btn btn-primary {
+  background-color: #2d253a;
 }
