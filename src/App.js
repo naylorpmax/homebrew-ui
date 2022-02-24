@@ -1,6 +1,6 @@
 import logo from './dragon-header-2.jpeg';
 import './App.css';
-import { React } from 'react';
+import { React, useState, useEffect } from 'react';
 import { Routes, Route, NavLink as Link, useLocation } from "react-router-dom"
 
 function App() {
@@ -30,7 +30,7 @@ function App() {
           <Route path="about" element={<About />}></Route>
           <Route path="login" element={<Login/>}></Route>
           <Route path="welcome" element={<Welcome/>}></Route>
-          {/* <Route path="spell/lookup" element={<Spell/>}></Route> */}
+          <Route path="spell/lookup" element={<Spell/>}></Route>
           <Route path="*" element={<NotFound />}></Route>
         </Routes>
       </div>
@@ -46,9 +46,24 @@ const login = (url) => {
     }
   })
   .catch(err => {
-    console.log(err)
+    console.log(err);
   });
 };
+
+const spell = async (url, body) => {
+  await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(body),
+  })
+  .then(response => response.json())
+  .then(response => {
+    console.log("inside spell(): " + response["spells"].map((spell) => spell.name));
+    return response
+  })
+  .catch(err => {
+    console.log(err);
+  })
+}
 
 export const Home = () => {
   return <div>You are in Home page</div>
@@ -79,7 +94,7 @@ export const Login = () => {
 export const Welcome = () => {
   const search = useLocation().search;
   const searchParams = new URLSearchParams(search);
-  const userName = searchParams.get("name")
+  const userName = searchParams.get("name");
 
   if (userName) {
     return <div>Welcome to Power Attack Publishing, {userName}!</div>
@@ -87,12 +102,46 @@ export const Welcome = () => {
   return <div>Welcome to Power Attack Publishing!</div>
 }
 
-// export const Spell = () => {
+export const Spell = () => {
+  const search = useLocation().search;
+  const searchParams = new URLSearchParams(search);
 
-//   const url = "http://localhost:8080/spell/lookup"
-//   const body = {
-//     "name": 
-//   }
-// }
+  const url = "http://localhost:8080/spell/lookup";
+  const body = {}
+
+  const spellName = searchParams.get("name");
+  if (spellName) {
+    body["name"] = spellName;
+  }
+
+  const spellLevel = searchParams.get("level");
+  if (spellLevel) {
+    body["level"] = spellLevel;
+  }
+
+  const [response, setResponse] = useState({});
+
+  useEffect(() => {
+    spell(url, body)
+      .then(response => {
+        setResponse(response);
+        console.log("inside Spell().useEffect(): " + response)
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }, []);
+
+  console.log("inside Spell(): " + response);
+
+  return <div>
+    got some spelllllls!
+    {/* {
+      response.map((spell) => {
+        <h1>spell.name</h1>
+      })
+  } */}
+  </div>
+}
 
 export default App;
