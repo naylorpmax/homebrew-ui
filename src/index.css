@@ -1,7 +1,7 @@
 body {
   margin: 0 auto;
   max-width: 900px;
-  font-family: Verdana, Geneva, Tahoma, sans-serif
+  font-family: Geneva, Tahoma, sans-serif
 }
 nav ul {
   display: flex;

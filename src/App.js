@@ -1,5 +1,7 @@
 import logo from './dragon-header-2.jpeg';
 import './App.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Card, CardGroup, Container, Row } from "react-bootstrap";
 import { React, useState, useEffect } from 'react';
 import { Routes, Route, NavLink as Link, useLocation } from "react-router-dom"
 
@@ -49,21 +51,6 @@ const login = (url) => {
     console.log(err);
   });
 };
-
-const spell = async (url, body) => {
-  await fetch(url, {
-    method: "POST",
-    body: JSON.stringify(body),
-  })
-  .then(response => response.json())
-  .then(response => {
-    console.log("inside spell(): " + response["spells"].map((spell) => spell.name));
-    return response
-  })
-  .catch(err => {
-    console.log(err);
-  })
-}
 
 export const Home = () => {
   return <div>You are in Home page</div>
@@ -119,29 +106,60 @@ export const Spell = () => {
     body["level"] = spellLevel;
   }
 
-  const [response, setResponse] = useState({});
+  const [spells, setSpells] = useState([]);
 
   useEffect(() => {
-    spell(url, body)
-      .then(response => {
-        setResponse(response);
-        console.log("inside Spell().useEffect(): " + response)
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  }, []);
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify(body),
+    })
+    .then(r => r.json())
+    .then(r => {
+      setSpells(r["spells"]);
+    })
+    .catch(err => {
+      console.log(err);
+    })
+  },[]);
 
-  console.log("inside Spell(): " + response);
+  // console.log("Spell(): " + spells.map((spell) => " " + spell.name));
 
-  return <div>
-    got some spelllllls!
-    {/* {
-      response.map((spell) => {
-        <h1>spell.name</h1>
-      })
-  } */}
-  </div>
+  const chunk = (arr, chunkSize = 1, cache = []) => {
+    const tmp = [...arr]
+    if (chunkSize <= 0) return cache
+    while (tmp.length) cache.push(tmp.splice(0, chunkSize))
+    return cache
+  }
+
+  const spellChunks = chunk(spells, 3);
+  console.log(spellChunks);
+
+  const rows = spellChunks.map((spellChunk) => {
+    const cols = spellChunk.map((spell) => {
+      return (
+        <Card key={spell.name} style={{ width: "18rem" }}>
+          <Card.Body>
+            <Card.Header>From {spell.source}</Card.Header>
+            <Card.Title>{spell.name}</Card.Title>
+            <Card.Subtitle><b>Level {spell.level} ({spell.school})</b></Card.Subtitle>
+            <br></br>
+            <Card.Text>{spell.description}</Card.Text>
+            <Card.Footer><i>{spell.classes}</i></Card.Footer>
+          </Card.Body>
+        </Card>
+    )})
+    return (
+      <Row><CardGroup>{cols}</CardGroup></Row>
+    )
+  });
+
+  return (
+    <div style={{display: 'flex', flexDirection: 'row'}}>
+      <Container style={{backgroundColor: '#8c110b'}}>
+        {rows}
+      </Container>
+    </div>
+  );
 }
 
 export default App;
